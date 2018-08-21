@@ -1,7 +1,7 @@
 from typing import Dict
 from enum import Enum
 
-from sql_toolbox.utilities.sql_refactor import SqlSession
+from squealer.utilities.sql_refactor import SqlSession
 
 
 class SqlDataType(Enum):
