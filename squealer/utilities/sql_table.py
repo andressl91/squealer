@@ -28,7 +28,7 @@ class DataTable:
 
     def validate_category_type(self, categories):
         valid_types = SqlDataType.data_types()
-        print(valid_types)
+        (valid_types)
         for d_type in list(categories.values()):
             if d_type not in valid_types:
                 raise RuntimeError("Not Valid data_type")
@@ -88,11 +88,8 @@ class DataTableTools:
                         text += f"{cat} {sql_type},"
 
                     text += "PRIMARY KEY (data_table.primary_key))"
-                print(text) 
+                (text) 
                 sql_ses.cursor.execute(text)
-
-
-
 
     def write_to_table(self, data_table: DataTable, sql_data: Dict[str, str]):
         #TODO: Make keyword argument to write to table even if all
@@ -100,26 +97,52 @@ class DataTableTools:
         if self._valid_keys(data_table, sql_data):
             with self._sql_session as sql_ses:
                 text = f"INSERT INTO {data_table.table_name}"
-                features = "(" + ",".join(cat for cat in sql_data)+ ")"
+                features = "(" + ",".join(cat for cat in sql_data) + ")"
                 nr_values = "VALUES(" + ",".join("?" for i in
                                                  range(len(sql_data))) + ")"
-                
+
                 sql = text + features + nr_values
-            
+
                 values = tuple(sql_data.values())
-                print(sql, values)
+                (sql, values)
                 sql_ses.cursor.execute(sql, values)
                 sql_ses.commit()
-               
 
     def purge_table(self, data_table: DataTable):
         sql = f"DELETE FROM {data_table.table_name}"
         with self._sql_session as sql_ses:
             sql_ses.cursor.execute(sql)
             sql_ses.commit()
-    
+
     def delete_table(self, data_table: DataTable):
         sql = f"DROP TABLE {data_table.table_name}"
         with self._sql_session as sql_ses:
             sql_ses.cursor.execute(sql)
             sql_ses.commit()
+
+    def get_categories(self, data_table: DataTable):
+        #TODO: Get datatype made during construction
+        sql = f"""SELECT * FROM {data_table.table_name}"""
+        with self._sql_session as sql_ses:
+            sql_ses.cursor.execute(sql)
+            categories = list(map(lambda x: x[0], sql_ses.cursor.description))
+            return categories
+
+    def write_to_csv(self, path: str, table: str):
+        # to export as csv file
+        # WRITE TO CSV IKKE HELT GOD DA "," I ADRESSEN F* UP CSV
+        # MULIG PREPROSSESEROMG I AKTIVITET ER LØSNINGEN!
+        self.connect_db()
+        cursor = self.get_cursor()
+        cursor.execute(f"PRAGMA table_info({table})")
+        table_info = cursor.fetchall()
+        colum_headers = " ".join([t[1] + "," for t in table_info])[:-1]
+
+        with open(path, "wb") as write_file:
+            write_file.write(colum_headers.encode())
+            write_file.write("\n".encode())
+            for row in cursor.execute(f"SELECT * FROM {table}"):
+                writeRow = " ".join([str(i) + "," for i in row])[:-1]
+                write_file.write(writeRow.encode())
+                write_file.write("\n".encode())
+        self.close_db()

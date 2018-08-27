@@ -40,7 +40,7 @@ setup(
     include_package_data=True,
     keywords='squealer',
     name='squealer',
-    packages=find_packages(include=['squealer']),
+    packages=["squealer", "squealer.utilities"],
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

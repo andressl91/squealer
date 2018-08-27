@@ -29,6 +29,8 @@ class SqliteSession(SqlSession):
         self._cursor = None
 
     def connect(self):
+        if self._connection:
+            return
         self._connection = sqlite3.connect(self.db_path)
     
     @property
@@ -46,6 +48,12 @@ class SqliteSession(SqlSession):
         self._cursor.execute(sql_command)
 
     def close_db(self):
+        """Closes the connection:
+
+        Note:
+            Due too Python API PEP 249, connections is unusable after close().
+            Therefore create new connection each time.
+        """
         self._connection.close()
         self._connection = None
         self._cursor = None
@@ -55,6 +63,13 @@ class SqliteSession(SqlSession):
         return self
 
     def __exit__(self, type, value, traceback):
+        """
+        Note:
+            If one uses 2 or more with statements regarding same connection,
+            the close_db will make connection unusable. Tempfix, attemt to
+            connect and then close.
+        """
+        self.connect()
         self.close_db()
 
 
