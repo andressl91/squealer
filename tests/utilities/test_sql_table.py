@@ -1,7 +1,7 @@
 import os
 import pytest
-from squealer.utilities.sql_table import DataTable, DataTableTools     
-from squealer.utilities.sql_refactor import SqliteSession
+from squealer.sql_table_tools import DataTable, DataTableTools     
+from squealer.sqlite_session import SqliteSession
 
 
 def test_data_table():
