@@ -32,11 +32,9 @@ class SqliteSession(SqlSession):
         if self._connection:
             return
         self._connection = sqlite3.connect(self.db_path)
-    
+
     @property
     def cursor(self):
-        if not self._connection:
-            raise Exception("no connection")
         if not self._cursor:
             self._cursor = self._connection.cursor()
         return self._cursor
@@ -71,7 +69,3 @@ class SqliteSession(SqlSession):
         """
         self.connect()
         self.close_db()
-
-
-   
-    
