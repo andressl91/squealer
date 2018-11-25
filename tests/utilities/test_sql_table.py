@@ -26,19 +26,23 @@ def test_data_table_tools():
     categories = {"money": "REAL", "time": "REAL"}
     data_table = DataTable(table_name=table_name, categories=categories)
 
+    # TODO: Consider refactoring, where and SqliteSession has a .get_table
+    # method also, if allready exist. Which has editing tools.
     sql_session = SqliteSession(db_path=db_path)
     
     db_tools = DataTableTools(sql_session=sql_session)
-    # Clean up table for test
-    with sql_session as sql_s:
-        if db_tools._does_table_exist(sql_s, table_name):
-            db_tools.delete_table(data_table)
+    # Clean datatable
+    db_tools.clean_table(data_table)
 
     db_tools.create_table(data_table=data_table)
 
     sql_data = {"time": "2000", "money": "10"}
     db_tools.write_to_table(data_table, sql_data)
     
+    # Test write of incomplete data
+    sql_data = {"time": "2000", "money": "NULL"}
+    db_tools.write_to_table(data_table, sql_data)
+
     cats = db_tools.get_categories(data_table)
     if data_table.primary_key == False:
         cats = set(cats)
@@ -50,7 +54,7 @@ def test_data_table_tools():
     with pytest.raises(RuntimeError):
         db_tools.write_to_table(data_table, sql_data)
 
-   #  db_tools.clean_table(data_table)
+    a = db_tools.select(data_table, sql="*")
+    print(a)
+    db_tools.clean_table(data_table)
 
-
-    

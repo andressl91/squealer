@@ -131,9 +131,14 @@ class DataTableTools:
             sql_ses.cursor.execute(text)
 
     def write_to_table(self, data_table: DataTable, sql_data: Dict[str, str]):
-        """Write data to data table."""
-        # TODO: Make keyword argument to write to table even if all
-        # categoies are not present. Ex beautiful soup missing entity from scan
+        """Write data to data table.
+        
+        
+        Note:
+            For missing data use NULL as value.
+        """
+
+        
         if self._valid_keys(data_table, sql_data):
             with self._sql_session as sql_ses:
                 text = f"INSERT INTO {data_table.table_name}"
