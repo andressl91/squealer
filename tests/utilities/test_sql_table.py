@@ -4,21 +4,36 @@ from squealer.sql_table_tools import DataTable, DataTableTools
 from squealer.sqlite_session import SqliteSession
 
 
-def test_data_table_initiation():
+def test_recreate_sqlite_db():
+    # TODO: FIND BUG MAKING THIS TEST FAIL EVERY SECOND RUN
+    db_path = os.path.join(os.path.dirname(__file__), "..", "data", "test.db")
+    sql_session = SqliteSession(db_path=db_path)
+    
+    db_tools = DataTableTools(sql_session=sql_session)
+    db_tools.build_db()
 
-    table_name = "data.db"
-    categories = {"money": "REAL"}
-    data_table = DataTable(table_name=table_name,
-                           categories=categories)
+    for table in db_tools.tables:
+        db_tools.delete_table(table.table_name)
 
-    assert data_table.table_name == table_name
-    assert data_table.categories == categories
 
-    with pytest.raises(RuntimeError):
-        data_table.validate_category_type({"money": "REA"})
+    categories = {"money": "RREAL", "time": "REAL"}
+    with pytest.raises(TypeError):
+        db_tools.create_table(table_name="data",
+                              categories=categories)
+
+    categories = {"money": "REAL", "time": "REAL"}
+    db_tools.create_table(table_name="data",
+                          categories=categories)
+
+    # Check that data tables are added to instance attribute tables
+    a = db_tools.tables
+    # Check that object __dict__ contains a map with name: DataTable
+    b = db_tools.__dict__
+    print(b)
 
 
 def test_data_table_tools():
+    #TODO: REWRITE TEST TO FIT REFACTORISATION
 
     db_path = os.path.join(os.path.dirname(__file__), "..", "data", "test.db")
 
@@ -57,4 +72,8 @@ def test_data_table_tools():
     a = db_tools.select(data_table, sql="*")
     print(a)
     db_tools.clean_table(data_table)
+
+
+if __name__ == "__main__":
+    test_recreate_sqlite_db()
 
