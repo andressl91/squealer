@@ -50,6 +50,8 @@ class DataTable:
         return self._table_name
 
     def _valid_keys(self, sql_data: Dict[str, str]):
+        print(self._categories.keys()) 
+        print(sql_data.keys())
         if self._categories.keys() == sql_data.keys():
             return True
 
@@ -142,7 +144,7 @@ class DataTableTools:
 
         """
         self._sql_session = sql_session
-        self.tables = []
+        self.tables = {}
 
     def _validate_category_type(self, categories) -> bool:
         """Check for valid sql datatype using SqlDatType enum.
@@ -201,25 +203,24 @@ class DataTableTools:
 
         return column_category_map
 
-
     def build_db(self):
         """Mirror all tables in sqlite db with DataTable objects.
-        
+
         Note:
             For now all tables within database is added so instance __dict__,
             and tables list.
 
         """
         tables = self._fetch_all_tables()
-        self.tables = []
-
+        print(tables)
         for tab in tables:
             column_data_type = self.pragma_table(table_name=tab)
             data_table = DataTable(sql_session=self._sql_session,
                                    table_name=tab,
                                    categories=column_data_type)
-            self.tables.append(data_table)
             self.__dict__[tab] = data_table
+            print(f"Added {tab} to tables")
+            self.tables[tab] = data_table
 
 
     def create_table(self, table_name: str,
@@ -231,6 +232,7 @@ class DataTableTools:
             data_table: User defined table.
 
         """
+        print("CREATING TABLE")
         self._validate_category_type(categories)
         with self._sql_session as sql_ses:
             if self._does_table_exist(sql_ses, table_name):
@@ -251,8 +253,11 @@ class DataTableTools:
             (text)
             sql_ses.cursor.execute(text)
 
-        # For now best way to update instance attribute and __dict__.
+        print("Hit the bottom")
+        print("HERE to build db")
         self.build_db()
+
+        # For now best way to update instance attribute and __dict__.
 
 
     def delete_table(self, table_name):
@@ -263,8 +268,8 @@ class DataTableTools:
             sql_ses.commit()
 
         # Delete from list for now
-        index = self.tables.index(table_name)
-        del self.tables[index]
+        # TODO: Change to set
+        del self.tables[table_name]
         del self.__dict__[table_name]
 
     def get_categories(self, table_name):
