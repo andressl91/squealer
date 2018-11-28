@@ -50,9 +50,8 @@ class DataTable:
         return self._table_name
 
     def _valid_keys(self, sql_data: Dict[str, str]):
-        print(self._categories.keys()) 
-        print(sql_data.keys())
-        if self._categories.keys() == sql_data.keys():
+        no_id_categoires = [cat for cat in self._categories if cat != "id"]
+        if set(no_id_categoires) == set(sql_data.keys()):
             return True
 
         else:
@@ -84,6 +83,9 @@ class DataTable:
             sql_ses.cursor.execute(sql)
             result = sql_ses.cursor.fetchall()
             return result
+
+    def multiselect(self):
+        pass
    
     def clean_table(self):
         """Remove all values in table. """
@@ -212,14 +214,12 @@ class DataTableTools:
 
         """
         tables = self._fetch_all_tables()
-        print(tables)
         for tab in tables:
             column_data_type = self.pragma_table(table_name=tab)
             data_table = DataTable(sql_session=self._sql_session,
                                    table_name=tab,
                                    categories=column_data_type)
             self.__dict__[tab] = data_table
-            print(f"Added {tab} to tables")
             self.tables[tab] = data_table
 
 
@@ -232,7 +232,6 @@ class DataTableTools:
             data_table: User defined table.
 
         """
-        print("CREATING TABLE")
         self._validate_category_type(categories)
         with self._sql_session as sql_ses:
             if self._does_table_exist(sql_ses, table_name):
@@ -252,9 +251,6 @@ class DataTableTools:
                 text += "PRIMARY KEY (primary_key))"
             (text)
             sql_ses.cursor.execute(text)
-
-        print("Hit the bottom")
-        print("HERE to build db")
         self.build_db()
 
         # For now best way to update instance attribute and __dict__.
