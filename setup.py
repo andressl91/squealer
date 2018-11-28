@@ -11,11 +11,8 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
-
-setup_requirements = ['pytest-runner', ]
-
-test_requirements = ['pytest', ]
+# Required python libraries
+# requirements = []
 
 setup(
     name="squealer",
@@ -25,7 +22,7 @@ setup(
     description="Another sqlite wrapper",
     long_description=long_description + '\n\n' + history,
     url='https://github.com/andressl91/squealer',
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests*']),
     license="MIT license",
     keywords="sqlite sqlite3 development",
     classifiers=[
@@ -38,6 +35,4 @@ setup(
 )
 
 setup(
-    install_requires=requirements,
-    setup_requires=setup_requirements,
 )

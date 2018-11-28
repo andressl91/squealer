@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 from enum import Enum
 
 from squealer.sqlite_session import SqlSession
@@ -86,7 +86,7 @@ class DataTable:
 
     def multiselect(self):
         pass
-   
+
     def clean_table(self):
         """Remove all values in table. """
         sql = f"DELETE FROM {self._table_name}"
@@ -161,17 +161,18 @@ class DataTableTools:
         valid_types = SqlDataType.data_types()
         for cat, data_type in categories.items():
             if data_type not in valid_types:
-                raise TypeError(f"""Category "{cat}" of type "{data_type}". Not Valid data_type""")
+                raise TypeError(f"""Category "{cat}" of type "{data_type}". 
+                                Not Valid data_type""")
+
 
         return True
-   
+
     def _fetch_all_tables(self):
         with self._sql_session as sql_ses:
             sql_ses.cursor.execute("SELECT name FROM sqlite_master where \
                                   type='table'")
 
             tables = sql_ses.cursor.fetchall()
-
         return [tab[0] for tab in tables]
 
     def _does_table_exist(self, sql_ses, table_name) -> bool:
@@ -191,7 +192,7 @@ class DataTableTools:
             return True
 
         return False
-    
+
     def pragma_table(self, table_name):
         column_category_map = {}
         sql = f"PRAGMA table_info({table_name})"
@@ -222,10 +223,9 @@ class DataTableTools:
             self.__dict__[tab] = data_table
             self.tables[tab] = data_table
 
-
     def create_table(self, table_name: str,
-                           categories: Dict[str, str],
-                           primary_key=False):
+                     categories: Dict[str, str],
+                     primary_key=False):
         """Create new table in connected database.
 
         Paramteters:
@@ -253,9 +253,6 @@ class DataTableTools:
             sql_ses.cursor.execute(text)
         self.build_db()
 
-        # For now best way to update instance attribute and __dict__.
-
-
     def delete_table(self, table_name):
         """Remove table from database."""
         sql = f"DROP TABLE {table_name}"
@@ -275,5 +272,3 @@ class DataTableTools:
             sql_ses.cursor.execute(sql)
             categories = list(map(lambda x: x[0], sql_ses.cursor.description))
             return categories
-
-

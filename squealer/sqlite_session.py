@@ -69,5 +69,3 @@ class SqliteSession(SqlSession):
         """
         self.connect()
         self.close_db()
-
-
