@@ -5,8 +5,8 @@ from squealer.sqlite_session import SqliteSession
 
 
 # TODO: Replace with pytest fixture
-def get_db_tools():
-    tf = tempfile.mktemp(suffix=".db", prefix="test.db")
+def get_db_tools(db_name:str="test.db"):
+    tf = tempfile.mktemp(suffix=".db", prefix=db_name)
     sql_session = SqliteSession(db_path=tf)
     db_tools = DataTableTools(sql_session=sql_session)
     return db_tools
@@ -24,7 +24,21 @@ def test_recreate_sqlite_db():
     assert list(db_tools.tables.keys()) == []
 
 
-def test_create_and_write_table():
+def test_create_table_uniqe_key():
+    db_tools = get_db_tools()
+
+
+    categories = {"money": "REAL", "time": "REAL"}
+    db_tools.create_table(table_name="data",
+                         categories=categories,
+                         primary_key="money")
+    data_table = db_tools.tables["data"]
+    data_table.write_to_table({"money": 2000, "time": 10})
+
+    print(data_table.select("*"))
+
+
+def test_read_and_write_table():
     db_tools = get_db_tools()
     not_valid_categories = {"money": "RREAL", "time": "REAL"}
     # Checks for unvalid SQL data type
@@ -53,4 +67,4 @@ def test_create_and_write_table():
 
 
 if __name__ == "__main__":
-    test_create_and_write_table()
+    test_create_table_uniqe_key()

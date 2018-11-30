@@ -75,12 +75,17 @@ class DataTable:
 
         return True
 
-    def select(self, sql: str):
+    def select(self, sql: str, min_val: int=None, max_val: int=None):
+        
         """User defined sql select with fetchall"""
         # TODO: Get datatype made during construction
-        sql = f"""SELECT {sql} FROM {self._table_name}"""
+        sql_request = f"""SELECT {sql} FROM {self._table_name}"""
+
+        if min_val:
+            sql_request += sql_request + f" WHERE {sql} < {min_val}"
+
         with self._sql_session as sql_ses:
-            sql_ses.cursor.execute(sql)
+            sql_ses.cursor.execute(sql_request)
             result = sql_ses.cursor.fetchall()
             return result
 
@@ -161,7 +166,7 @@ class DataTableTools:
         valid_types = SqlDataType.data_types()
         for cat, data_type in categories.items():
             if data_type not in valid_types:
-                raise TypeError(f"""Category "{cat}" of type "{data_type}". 
+                raise TypeError(f"""Category "{cat}" of type "{data_type}".
                                 Not Valid data_type""")
 
 
@@ -225,7 +230,8 @@ class DataTableTools:
 
     def create_table(self, table_name: str,
                      categories: Dict[str, str],
-                     primary_key=False):
+                     primary_key: str=""):
+                     unique: str="")
         """Create new table in connected database.
 
         Paramteters:
@@ -235,7 +241,7 @@ class DataTableTools:
         self._validate_category_type(categories)
         with self._sql_session as sql_ses:
             if self._does_table_exist(sql_ses, table_name):
-                return
+                raise RuntimeError("Table allready exists")
             if not primary_key:
                 text = f"""CREATE TABLE {table_name} (id INTEGER PRIMARY KEY"""
                 for cat, sql_type in categories.items():
@@ -244,11 +250,13 @@ class DataTableTools:
                 text += ")"
 
             else:
+                #TODO: Add support for unique
+                assert primary_key in list(categories.keys())
                 text = f"""CREATE TABLE {table_name} ("""
                 for cat, sql_type in categories.items():
                     text += f"{cat} {sql_type},"
 
-                text += "PRIMARY KEY (primary_key))"
+                text += f"PRIMARY KEY ({primary_key}))"
             (text)
             sql_ses.cursor.execute(text)
         self.build_db()
