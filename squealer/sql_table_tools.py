@@ -152,6 +152,7 @@ class DataTableTools:
         """
         self._sql_session = sql_session
         self.tables = {}
+        self.build_db()
 
     def _validate_category_type(self, categories) -> bool:
         """Check for valid sql datatype using SqlDatType enum.
@@ -165,7 +166,8 @@ class DataTableTools:
         """
         valid_types = SqlDataType.data_types()
         for cat, data_type in categories.items():
-            if data_type not in valid_types:
+            d_type = data_type.split(" ")[0]
+            if d_type not in valid_types:
                 raise TypeError(f"""Category "{cat}" of type "{data_type}".
                                 Not Valid data_type""")
 
@@ -230,8 +232,8 @@ class DataTableTools:
 
     def create_table(self, table_name: str,
                      categories: Dict[str, str],
-                     primary_key: str=""):
-                     unique: str="")
+                     primary_key_id: bool=True):
+
         """Create new table in connected database.
 
         Paramteters:
@@ -242,7 +244,7 @@ class DataTableTools:
         with self._sql_session as sql_ses:
             if self._does_table_exist(sql_ses, table_name):
                 raise RuntimeError("Table allready exists")
-            if not primary_key:
+            if primary_key_id:
                 text = f"""CREATE TABLE {table_name} (id INTEGER PRIMARY KEY"""
                 for cat, sql_type in categories.items():
                     text += f", {cat} {sql_type}"
@@ -250,13 +252,16 @@ class DataTableTools:
                 text += ")"
 
             else:
-                #TODO: Add support for unique
-                assert primary_key in list(categories.keys())
                 text = f"""CREATE TABLE {table_name} ("""
-                for cat, sql_type in categories.items():
-                    text += f"{cat} {sql_type},"
+                keys = list(categories.keys())
+                for i in range(len(keys)):
+                    if i < len(keys) - 1:
+                        text += f"{keys[i]} {categories[keys[i]]}, "
+                    else:
+                        text += f"{keys[i]} {categories[keys[i]]}"
 
-                text += f"PRIMARY KEY ({primary_key}))"
+                text += ")"
+                print(text)
             (text)
             sql_ses.cursor.execute(text)
         self.build_db()

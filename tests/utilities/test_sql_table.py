@@ -5,8 +5,9 @@ from squealer.sqlite_session import SqliteSession
 
 
 # TODO: Replace with pytest fixture
-def get_db_tools(db_name:str="test.db"):
+def get_db_tools(db_name: str="test.db"):
     tf = tempfile.mktemp(suffix=".db", prefix=db_name)
+    # tf = r"/home/jackal/.virtenv/squealer/tests/data/test.db"
     sql_session = SqliteSession(db_path=tf)
     db_tools = DataTableTools(sql_session=sql_session)
     return db_tools
@@ -27,15 +28,18 @@ def test_recreate_sqlite_db():
 def test_create_table_uniqe_key():
     db_tools = get_db_tools()
 
-
-    categories = {"money": "REAL", "time": "REAL"}
+    categories = {"money": "REAL", "time": "REAL PRIMARY KEY"}
     db_tools.create_table(table_name="data",
-                         categories=categories,
-                         primary_key="money")
+                          categories=categories,
+                          primary_key_id=False)
+
     data_table = db_tools.tables["data"]
     data_table.write_to_table({"money": 2000, "time": 10})
+    data_table.write_to_table({"time": 33, "money": 22})
 
-    print(data_table.select("*"))
+    res = data_table.select("*")
+    assert res[0] == (2000, 10)
+    assert res[1] == (22, 33)
 
 
 def test_read_and_write_table():
