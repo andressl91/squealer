@@ -16,17 +16,19 @@ squealer
 
 
 
-Sqlite3 wrapper
+Squealer is yet another SQL database wrapper, currently for Sqlite databases.
 
 
 * Free software: MIT license
 * Documentation: https://squealer.readthedocs.io.
 
+Squealer is 
 
 Features
 --------
 
 * TODO
+  Add support for MySql
 
 Credits
 -------

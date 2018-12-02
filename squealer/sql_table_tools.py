@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from enum import Enum
 
 from squealer.sqlite_session import SqlSession
@@ -76,7 +76,6 @@ class DataTable:
         return True
 
     def select(self, sql: str, min_val: int=None, max_val: int=None):
-        
         """User defined sql select with fetchall"""
         # TODO: Get datatype made during construction
         sql_request = f"""SELECT {sql} FROM {self._table_name}"""
@@ -99,7 +98,7 @@ class DataTable:
             sql_ses.cursor.execute(sql)
             sql_ses.commit()
 
-    def write_to_table(self, sql_data: Dict[str, str]):
+    def write(self, sql_data: Dict[str, str]):
         """Write data to data table.
 
 
@@ -115,11 +114,25 @@ class DataTable:
                                                  range(len(sql_data))) + ")"
 
                 sql = text + features + nr_values
-
                 values = tuple(sql_data.values())
                 (sql, values)
                 sql_ses.cursor.execute(sql, values)
                 sql_ses.commit()
+
+    def multi_write(self, sql_data: List[Dict[str, str]]):
+
+        # TODO: Multi write should support random order of dict.keys
+        # see test_read_and_write_tables
+        with self._sql_session as sql_ses:
+            text = f"INSERT INTO {self._table_name}"
+            features = " (" + ",".join(cat for cat in sql_data[0]) + ") "
+            nr_values = " VALUES (" + ",".join("?" for i in
+                                             range(len(sql_data))) + ")"
+
+            sql = text + features + nr_values
+            values = [tuple(data_values.values()) for data_values in sql_data]
+            sql_ses.cursor.executemany(sql, values)
+            sql_ses.commit()
 
     def write_to_csv(self, path: str, table: str):
         # to export as csv file
