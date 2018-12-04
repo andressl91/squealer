@@ -1,3 +1,4 @@
+
 from typing import Dict, List
 from enum import Enum
 
@@ -111,8 +112,7 @@ class DataTable:
             with self._sql_session as sql_ses:
                 text = f"INSERT INTO {self._table_name}"
                 features = "(" + ",".join(cat for cat in sql_data) + ")"
-                nr_values = "VALUES(" + ",".join("?" for i in
-                                                 range(len(sql_data))) + ")"
+                nr_values = "VALUES(" + ",".join("?" * len(sql_data)) + ")"
 
                 sql = text + features + nr_values
                 values = tuple(sql_data.values())
@@ -125,18 +125,24 @@ class DataTable:
 
         Attrs:
             sql_data: List of dicts, mapping column to value.
-        
+
+        Note:
+            Multi write supports random order of dict, with penalty since
+            every sql_data map in list must be checked. Users responsibility?
+
         """
-        # TODO: Multi write should support random order of dict.keys
-        # see test_read_and_write_tables
+        first_features = [cat for cat in sql_data[0]]
+        values = []
         with self._sql_session as sql_ses:
             text = f"INSERT INTO {self._table_name}"
             features = " (" + ",".join(cat for cat in sql_data[0]) + ") "
-            nr_values = " VALUES (" + ",".join("?" for i in
-                                             range(len(sql_data))) + ")"
+            nr_values = " VALUES (" + ",".join("?" * len(sql_data)) + ")"
 
             sql = text + features + nr_values
-            values = [tuple(data_values.values()) for data_values in sql_data]
+            for data_values in sql_data:
+                values.append(tuple(data_values[key]
+                                    for key in first_features))
+
             sql_ses.cursor.executemany(sql, values)
             sql_ses.commit()
 

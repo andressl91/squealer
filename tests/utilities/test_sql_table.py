@@ -55,10 +55,11 @@ def test_read_and_write_table():
 
     # Test write, and order of write features is arbritary
     data_table = db_tools.tables["data"]
-    sql_data = {"money": "2000", "time": "10"}
-    data_table.write(sql_data)
-    sql_data = {"time": "300", "money": "600"}
-    data_table.write(sql_data)
+    sql_data = [{"money": "2000", "time": "10"},
+                {"time": "300", "money": "600"}]
+
+    for data in sql_data:
+        data_table.write(data)
 
     res = data_table.select(["*"])
     assert res[0] == (1, 2000, 10)
@@ -68,15 +69,10 @@ def test_read_and_write_table():
     assert time_res[0] == (10, )
     assert time_res[1] == (300, )
 
-    sql_data = [{"money": "2000", "time": "10"},
-                {"time": "300", "money": "600"}]
     data_table.multi_write(sql_data)
     res = data_table.select(["*"])
-    # TODO: Multi write should support random order of dict.keys
-    # only write suppoerts this for now
-    # Keep separate due to loots of checks for many rows
     assert res[2] == (3, 2000, 10)
-    assert res[3] == (4, 300, 600)
+    assert res[3] == (4, 600, 300)
 
 
 if __name__ == "__main__":
