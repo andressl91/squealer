@@ -135,14 +135,13 @@ class DataTable:
         values = []
         with self._sql_session as sql_ses:
             text = f"INSERT INTO {self._table_name}"
-            features = " (" + ",".join(cat for cat in sql_data[0]) + ") "
-            nr_values = " VALUES (" + ",".join("?" * len(sql_data)) + ")"
+            features = "(" + ",".join(cat for cat in sql_data[0]) + ") "
+            nr_values = "VALUES (" + ",".join("?" * len(sql_data[0])) + ")"
 
             sql = text + features + nr_values
             for data_values in sql_data:
                 values.append(tuple(data_values[key]
                                     for key in first_features))
-
             sql_ses.cursor.executemany(sql, values)
             sql_ses.commit()
 

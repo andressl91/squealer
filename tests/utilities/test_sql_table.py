@@ -69,8 +69,13 @@ def test_read_and_write_table():
     assert time_res[0] == (10, )
     assert time_res[1] == (300, )
 
+    sql_data = [{"money": "2000", "time": "10"},
+                {"time": "300", "money": "600"}]
     data_table.multi_write(sql_data)
     res = data_table.select(["*"])
+    # TODO: Multi write should support random order of dict.keys
+    # only write suppoerts this for now
+    # Keep separate due to loots of checks for many rows
     assert res[2] == (3, 2000, 10)
     assert res[3] == (4, 600, 300)
 
