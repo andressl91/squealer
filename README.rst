@@ -26,9 +26,11 @@ Squealer is
 
 Features
 --------
+* Basic interaction with Sqlite databases
 
-* TODO
-  Add support for MySql
+Future
+--------
+*  Add support for MySql
 
 Credits
 -------
