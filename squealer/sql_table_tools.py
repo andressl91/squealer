@@ -1,3 +1,4 @@
+
 from typing import Dict, List
 from enum import Enum
 
@@ -75,21 +76,20 @@ class DataTable:
 
         return True
 
-    def select(self, sql: str, min_val: int=None, max_val: int=None):
-        """User defined sql select with fetchall"""
-        # TODO: Get datatype made during construction
-        sql_request = f"""SELECT {sql} FROM {self._table_name}"""
+    def select(self, sql: List[str]):
+        """Fetch one/multiple columns from table
 
-        if min_val:
-            sql_request += sql_request + f" WHERE {sql} < {min_val}"
+        Attr:
+            sql: List of requested columns
+
+        """
+        sql_request = f"""SELECT {" ".join(i for i in sql)} FROM
+        {self._table_name}"""
 
         with self._sql_session as sql_ses:
             sql_ses.cursor.execute(sql_request)
             result = sql_ses.cursor.fetchall()
             return result
-
-    def multiselect(self):
-        pass
 
     def clean_table(self):
         """Remove all values in table. """
@@ -99,8 +99,10 @@ class DataTable:
             sql_ses.commit()
 
     def write(self, sql_data: Dict[str, str]):
-        """Write data to data table.
+        """Write row of datato table.
 
+        Attrs:
+            sql_data: Mapping column to value
 
         Note:
             For missing data use NULL as value.
@@ -110,8 +112,7 @@ class DataTable:
             with self._sql_session as sql_ses:
                 text = f"INSERT INTO {self._table_name}"
                 features = "(" + ",".join(cat for cat in sql_data) + ")"
-                nr_values = "VALUES(" + ",".join("?" for i in
-                                                 range(len(sql_data))) + ")"
+                nr_values = "VALUES(" + ",".join("?" * len(sql_data)) + ")"
 
                 sql = text + features + nr_values
                 values = tuple(sql_data.values())
@@ -120,17 +121,27 @@ class DataTable:
                 sql_ses.commit()
 
     def multi_write(self, sql_data: List[Dict[str, str]]):
+        """Write multiple rows to table
 
-        # TODO: Multi write should support random order of dict.keys
-        # see test_read_and_write_tables
+        Attrs:
+            sql_data: List of dicts, mapping column to value.
+
+        Note:
+            Multi write supports random order of dict, with penalty since
+            every sql_data map in list must be checked. Users responsibility?
+
+        """
+        first_features = [cat for cat in sql_data[0]]
+        values = []
         with self._sql_session as sql_ses:
             text = f"INSERT INTO {self._table_name}"
-            features = " (" + ",".join(cat for cat in sql_data[0]) + ") "
-            nr_values = " VALUES (" + ",".join("?" for i in
-                                             range(len(sql_data))) + ")"
+            features = "(" + ",".join(cat for cat in sql_data[0]) + ") "
+            nr_values = "VALUES (" + ",".join("?" * len(sql_data[0])) + ")"
 
             sql = text + features + nr_values
-            values = [tuple(data_values.values()) for data_values in sql_data]
+            for data_values in sql_data:
+                values.append(tuple(data_values[key]
+                                    for key in first_features))
             sql_ses.cursor.executemany(sql, values)
             sql_ses.commit()
 
