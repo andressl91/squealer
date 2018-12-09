@@ -1,4 +1,5 @@
 import tempfile
+import sqlite3
 import pytest
 from squealer.sql_table_tools import DataTableTools
 from squealer.sqlite_session import SqliteSession
@@ -39,6 +40,9 @@ def test_create_table_uniqe_key():
 
     res = data_table.select(["*"])
     assert res[0] == (2000, 10)
+    with pytest.raises(sqlite3.IntegrityError):
+        data_table.write({"time": 33, "money": 22})
+
 
 
 def test_read_and_write_table():
