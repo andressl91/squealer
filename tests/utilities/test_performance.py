@@ -52,5 +52,6 @@ def test_read_and_write_table():
           f"Multi write uses {t_multi_write_end}")
     print(f"Multi write is faster/slower with a factor of {factor}")
 
+
 if __name__ == "__main__":
     test_read_and_write_table()

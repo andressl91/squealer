@@ -5,7 +5,6 @@ from squealer.sql_table_tools import DataTableTools
 from squealer.sqlite_session import SqliteSession
 
 
-# TODO: Replace with pytest fixture
 def get_db_tools(db_name: str="test.db"):
     tf = tempfile.mktemp(suffix=".db", prefix=db_name)
     # tf = r"/home/jackal/.virtenv/squealer/tests/data/test.db"
@@ -42,7 +41,6 @@ def test_create_table_uniqe_key():
     assert res[0] == (2000, 10)
     with pytest.raises(sqlite3.IntegrityError):
         data_table.write({"time": 33, "money": 22})
-
 
 
 def test_read_and_write_table():
@@ -85,4 +83,5 @@ def test_read_and_write_table():
 
 
 if __name__ == "__main__":
+
     test_read_and_write_table()
