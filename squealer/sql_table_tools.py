@@ -256,7 +256,8 @@ class DataTableTools:
 
     def create_table(self, table_name: str,
                      categories: Dict[str, str],
-                     primary_key_id: bool=True):
+                     primary_key_id: bool=True,
+                     overwrite: bool=False):
 
         """Create new table in connected database.
 
@@ -266,28 +267,28 @@ class DataTableTools:
         """
         self._validate_category_type(categories)
         with self._sql_session as sql_ses:
-            if self._does_table_exist(sql_ses, table_name):
-                raise RuntimeError("Table allready exists")
-            if primary_key_id:
-                text = f"""CREATE TABLE {table_name} (id INTEGER PRIMARY KEY"""
-                for cat, sql_type in categories.items():
-                    text += f", {cat} {sql_type}"
+            if not self._does_table_exist(sql_ses, table_name) or overwrite:
+                if primary_key_id:
+                    text = f"""CREATE TABLE {table_name} (id INTEGER PRIMARY KEY"""
+                    for cat, sql_type in categories.items():
+                        text += f", {cat} {sql_type}"
 
-                text += ")"
+                    text += ")"
 
-            else:
-                text = f"""CREATE TABLE {table_name} ("""
-                keys = list(categories.keys())
-                for i in range(len(keys)):
-                    if i < len(keys) - 1:
-                        text += f"{keys[i]} {categories[keys[i]]}, "
-                    else:
-                        text += f"{keys[i]} {categories[keys[i]]}"
+                else:
+                    text = f"""CREATE TABLE {table_name} ("""
+                    keys = list(categories.keys())
+                    for i in range(len(keys)):
+                        if i < len(keys) - 1:
+                            text += f"{keys[i]} {categories[keys[i]]}, "
+                        else:
+                            text += f"{keys[i]} {categories[keys[i]]}"
 
-                text += ")"
-                print(text)
-            (text)
-            sql_ses.cursor.execute(text)
+                    text += ")"
+                    print(text)
+                (text)
+                sql_ses.cursor.execute(text)
+        # TODO: Possibly not needed if exist, just check dict
         self.build_db()
 
     def delete_table(self, table_name):
