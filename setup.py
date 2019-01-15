@@ -16,7 +16,7 @@ with open('HISTORY.rst') as history_file:
 
 setup(
     name="squealer",
-    version="0.2.0",
+    version="0.3.0",
     author="jackal",
     author_email="pep8@pm.me",
     description="Another sqlite wrapper",

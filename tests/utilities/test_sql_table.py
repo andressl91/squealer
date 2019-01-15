@@ -81,7 +81,8 @@ def test_read_and_write_table():
     assert res[2] == (3, 2000, 10)
     assert res[3] == (4, 600, 300)
 
+    res = data_table.select(["time, money"])
+    print(res)
 
 if __name__ == "__main__":
-
     test_read_and_write_table()
