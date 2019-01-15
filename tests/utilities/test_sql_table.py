@@ -2,14 +2,12 @@ import tempfile
 import sqlite3
 import pytest
 from squealer.sql_table_tools import DataTableTools
-from squealer.sqlite_session import SqliteSession
 
 
 def get_db_tools(db_name: str="test.db"):
     tf = tempfile.mktemp(suffix=".db", prefix=db_name)
     # tf = r"/home/jackal/.virtenv/squealer/tests/data/test.db"
-    sql_session = SqliteSession(db_path=tf)
-    db_tools = DataTableTools(sql_session=sql_session)
+    db_tools = DataTableTools(db_path=tf)
     return db_tools
 
 

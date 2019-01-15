@@ -2,7 +2,7 @@
 from typing import Dict, List
 from enum import Enum
 
-from squealer.sqlite_session import SqlSession
+from squealer.sqlite_session import SqlSession, SqliteSession
 
 
 class SqlDataType(Enum):
@@ -167,14 +167,14 @@ class DataTable:
 
 class DataTableTools:
 
-    def __init__(self, *, sql_session: SqlSession):
+    def __init__(self, *, db_path: str):
         """Toolbox for performing sql queries to database.
 
         Parameters:
             sql_session:
 
         """
-        self._sql_session = sql_session
+        self._sql_session = SqliteSession(db_path=db_path)
         self.tables = {}
         self.build_db()
 
