@@ -82,5 +82,27 @@ def test_read_and_write_table():
     res = data_table.select(["time, money"])
     print(res)
 
+
+def test_select_wip():
+    db_tools = get_db_tools() 
+    categories = {"money": "INTEGER", "time": "INTEGER"}
+    db_tools.create_table(table_name="data",
+                          categories=categories)
+
+    # Test write, and order of write features is arbritary
+    data_table = db_tools.tables["data"]
+    sql_data = [{"money": "2000", "time": "10"},
+                {"time": "300", "money": "600"}]
+
+    for data in sql_data:
+        data_table.write(data)
+
+
+
+
 if __name__ == "__main__":
+    test_select_wip()
+
+
+
     test_read_and_write_table()

@@ -32,6 +32,7 @@ class DataTable:
            primary_key: primary_key for sql table.
 
         """
+        #TODO: Implement object for listing all columns in sql
         self._sql_session = sql_session
         self._primary_key = primary_key
         self._table_name = table_name
@@ -85,11 +86,29 @@ class DataTable:
         """
         sql_request = f"""SELECT {" ".join(i for i in sql)} FROM
         {self._table_name}"""
-
+        # TODO: Consider casting from tuple to numpy array etc
         with self._sql_session as sql_ses:
             sql_ses.cursor.execute(sql_request)
             result = sql_ses.cursor.fetchall()
             return result
+
+    def select_wip(self, sql: List[str]):
+        """Fetch one/multiple columns from table
+
+        Attr:
+            sql: List of requested columns
+
+        """
+        sql_request = f"""SELECT {" ".join(i for i in sql)} FROM
+        {self._table_name}"""
+        # TODO: Consider casting from tuple to numpy array etc
+        with self._sql_session as sql_ses:
+            sql_ses.cursor.execute(sql_request)
+            result = sql_ses.cursor.fetchall()
+
+        n_columns = len(result[0])
+        arrays = [[] for i in range(n_columns)]
+        
 
     def clean_table(self):
         """Remove all values in table. """
