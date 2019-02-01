@@ -4,15 +4,8 @@ import pytest
 from squealer.sql_table_tools import DataTableTools
 
 
-def get_db_tools(db_name: str="test.db"):
-    tf = tempfile.mktemp(suffix=".db", prefix=db_name)
-    # tf = r"/home/jackal/.virtenv/squealer/tests/data/test.db"
-    db_tools = DataTableTools(db_path=tf)
-    return db_tools
-
-
-def test_recreate_sqlite_db():
-    db_tools = get_db_tools()
+def test_recreate_sqlite_db(get_db_tools):
+    db_tools = get_db_tools
     # Check inital registry is empty
     assert list(db_tools.tables.keys()) == []
     categories = {"money": "REAL", "time": "REAL"}
@@ -23,8 +16,8 @@ def test_recreate_sqlite_db():
     assert list(db_tools.tables.keys()) == []
 
 
-def test_create_table_uniqe_key():
-    db_tools = get_db_tools()
+def test_create_table_uniqe_key(get_db_tools):
+    db_tools = get_db_tools
 
     categories = {"money": "REAL", "time": "REAL PRIMARY KEY"}
     db_tools.create_table(table_name="data",
@@ -41,8 +34,8 @@ def test_create_table_uniqe_key():
         data_table.write({"time": 33, "money": 22})
 
 
-def test_read_and_write_table():
-    db_tools = get_db_tools()
+def test_read_and_write_table(get_db_tools):
+    db_tools = get_db_tools
     not_valid_categories = {"money": "RREAL", "time": "REAL"}
     # Checks for unvalid SQL data type
     with pytest.raises(TypeError):

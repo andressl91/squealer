@@ -1,29 +1,12 @@
-import tempfile
+import pytest 
 import time
 from squealer.sql_table_tools import DataTableTools
 from squealer.sqlite_session import SqliteSession
 
 
-def get_db_tools(db_name: str="test.db"):
-    tf = tempfile.mktemp(suffix=".db", prefix=db_name)
-    # tf = r"/home/jackal/.virtenv/squealer/tests/data/test.db"
-    #sql_session = SqliteSession(db_path=tf)
-    db_tools = DataTableTools(db_path=tf)
-    return db_tools
 
-
-def get_lots_of_data(keys, n_rows):
-
-    sql_data = []
-    for i in range(n_rows):
-        data = [j for j in range(len(keys))]
-        sql_data.append(dict(zip(keys, data)))
-
-    return sql_data
-
-
-def test_read_and_write_table():
-    db_tools = get_db_tools()
+def test_read_and_write_table(get_db_tools, get_lots_of_data):
+    db_tools = get_db_tools
 
     keys = ["a", "b", "c", "d", "e"]
     cat = ["INTEGER" for i in range(len(keys))]
