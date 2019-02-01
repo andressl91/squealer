@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 import tempfile
 from squealer.sql_table_tools import DataTableTools
 from squealer.sqlite_session import SqliteSession
@@ -7,6 +8,11 @@ from squealer.sqlite_session import SqliteSession
 @pytest.fixture()
 def get_db_tools(db_name: str="test.db"):
     #tf = tempfile.mktemp(suffix=".db", prefix=db_name)
+    td = tempfile.mkdtemp()
+    tf = Path(td) / "test.db"
+    tf = str(tf)
+
+    db_tools = DataTableTools(db_path=tf)
     tf = tempfile.TemporaryFile(suffix=".db", prefix=db_name)
     tf = str(tf)
     db_tools = DataTableTools(db_path=tf)
