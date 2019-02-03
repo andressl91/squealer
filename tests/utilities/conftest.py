@@ -7,7 +7,6 @@ from squealer.sqlite_session import SqliteSession
 
 @pytest.fixture()
 def get_db_tools(db_name: str="test.db"):
-    #tf = tempfile.mktemp(suffix=".db", prefix=db_name)
     td = tempfile.mkdtemp()
     tf = Path(td) / "test.db"
     tf = str(tf)

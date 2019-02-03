@@ -61,7 +61,7 @@ def test_read_and_write_table():
 def single_write_of_rows(n_rows):
     
     td = tempfile.mkdtemp()
-    tf = Path(td) / "test.db"
+    tf = Path(td) / "test_rows.db"
     tf = str(tf)
     db_tools = DataTableTools(db_path=tf)
     keys = ["a", "b", "c", "d", "e"]
@@ -82,7 +82,7 @@ def single_write_of_rows(n_rows):
 
 def multiple_write_of_rows(n_rows):
     td = tempfile.mkdtemp()
-    tf = Path(td) / "test.db"
+    tf = Path(td) / "test_mrows.db"
     tf = str(tf)
     db_tools = DataTableTools(db_path=tf)
     keys = ["a", "b", "c", "d", "e"]
@@ -99,7 +99,7 @@ def multiple_write_of_rows(n_rows):
     return len(sql_data)
 
 def test_benchmark_single_row_write(benchmark):
-    n_rows = 1000
+    n_rows = 10000
     in_kwargs = {"n_rows": n_rows} 
 
     result = benchmark.pedantic(single_write_of_rows, kwargs=in_kwargs, 
@@ -109,7 +109,7 @@ def test_benchmark_single_row_write(benchmark):
 
 
 def test_benchmark_multiple_row_write(benchmark):
-    n_rows = 1000
+    n_rows = 10000
     in_kwargs = {"n_rows": n_rows} 
 
     result = benchmark.pedantic(multiple_write_of_rows, kwargs=in_kwargs, 
