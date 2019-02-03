@@ -1,6 +1,6 @@
 from typing import Dict, List
 from enum import Enum
-from StringIO import StringIO
+from io import StringIO
 
 from squealer.sqlite_session import SqlSession, SqliteSession
 
@@ -176,6 +176,7 @@ class DataTableTools:
         """
         self._sql_session = SqliteSession(db_path=db_path)
         self._sql_memory_session = None
+        self._sql_active_session = SqliteSession(db_path=db_path) 
         self.tables = {}
         self.build_db()
 
@@ -200,7 +201,7 @@ class DataTableTools:
         return True
 
     def _fetch_all_tables(self):
-        with self._sql_session as sql_ses:
+        with self._sql_active_session as sql_ses:
             sql_ses.cursor.execute("SELECT name FROM sqlite_master where \
                                   type='table'")
 
@@ -228,7 +229,7 @@ class DataTableTools:
     def pragma_table(self, table_name):
         column_category_map = {}
         sql = f"PRAGMA table_info({table_name})"
-        with self._sql_session as sql_ses:
+        with self._sql_active_session as sql_ses:
             sql_ses.cursor.execute(sql)
             pragma_info = sql_ses.cursor.fetchall()
 
@@ -249,7 +250,7 @@ class DataTableTools:
         tables = self._fetch_all_tables()
         for tab in tables:
             column_data_type = self.pragma_table(table_name=tab)
-            data_table = DataTable(sql_session=self._sql_session,
+            data_table = DataTable(sql_session=self._sql_active_session,
                                    table_name=tab,
                                    categories=column_data_type)
             self.__dict__[tab] = data_table
@@ -267,7 +268,7 @@ class DataTableTools:
 
         """
         self._validate_category_type(categories)
-        with self._sql_session as sql_ses:
+        with self._sql_active_session as sql_ses:
             if not self._does_table_exist(sql_ses, table_name) or overwrite:
                 if primary_key_id:
                     text = f"""CREATE TABLE {table_name} (id INTEGER PRIMARY KEY"""
@@ -295,7 +296,7 @@ class DataTableTools:
     def delete_table(self, table_name):
         """Remove table from database."""
         sql = f"DROP TABLE {table_name}"
-        with self._sql_session as sql_ses:
+        with self._sql_active_session as sql_ses:
             sql_ses.cursor.execute(sql)
             sql_ses.commit()
 
@@ -307,10 +308,22 @@ class DataTableTools:
     def get_categories(self, table_name):
         # TODO: Add bool for addiing categories to DataTable if none
         sql = f"""SELECT * FROM {table_name}"""
-        with self._sql_session as sql_ses:
+        with self._sql_active_session as sql_ses:
             sql_ses.cursor.execute(sql)
             categories = list(map(lambda x: x[0], sql_ses.cursor.description))
             return categories
+
+    def in_memory(self):
+        """Temp weak check if local db in memory has been initiated by instance attribute"""
+        if self._sql_memory_session is None:
+            return False
+
+        return True
+
+    def set_context(self, context:str = "local"):
+        if context == "local":
+            self._sql_active_session = self._sql_session
+            return self._sql_memory_session
 
     def load_to_memory(self):
         # initial_value='', newline='\n'
@@ -322,7 +335,7 @@ class DataTableTools:
         tempfile.seek(0)
         self._sql_memory_session = SqliteSession(":memory")
         with self._sql_memory_session as sql_mem:
-            sql_mem.cursor().executescript(tempfile.read())
+            sql_mem.cursor.executescript(tempfile.read())
             sql_mem.commit()
 
     def load_to_memory_v2(self):

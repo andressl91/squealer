@@ -46,7 +46,7 @@ def test_create_table_uniqe_key(get_db_tools):
         data_table.write({"time": 33, "money": 22})
 
 
-def test_read_and_write_table(get_db_tools):
+def test_read_and_write_table():
 
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
@@ -90,6 +90,17 @@ def test_read_and_write_table(get_db_tools):
 
     res = data_table.select(["time, money"])
     print(res)
+
+
+def test_memory_read_and_write():
+    tf = tempfile.mkdtemp()
+    tf = Path(tf) / "test.db"
+    db_tools = DataTableTools(db_path=tf)
+
+    assert not db_tools.in_memory() 
+
+    db_tools.load_to_memory()
+    
 
 if __name__ == "__main__":
     test_read_and_write_table()
