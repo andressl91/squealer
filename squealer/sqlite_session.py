@@ -34,6 +34,12 @@ class SqliteSession(SqlSession):
         self._connection = sqlite3.connect(self.db_path)
 
     @property
+    def connection(self):
+        if self._connection is None:
+            self.connect()
+        return self._connection
+
+    @property
     def cursor(self):
         if not self._cursor:
             self._cursor = self._connection.cursor()

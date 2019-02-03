@@ -1,6 +1,6 @@
-
 from typing import Dict, List
 from enum import Enum
+from StringIO import StringIO
 
 from squealer.sqlite_session import SqlSession, SqliteSession
 
@@ -175,6 +175,7 @@ class DataTableTools:
 
         """
         self._sql_session = SqliteSession(db_path=db_path)
+        self._sql_memory_session = None
         self.tables = {}
         self.build_db()
 
@@ -310,3 +311,23 @@ class DataTableTools:
             sql_ses.cursor.execute(sql)
             categories = list(map(lambda x: x[0], sql_ses.cursor.description))
             return categories
+
+    def load_to_memory(self):
+        # initial_value='', newline='\n'
+        tempfile = StringIO() 
+        with self._sql_session as sql_ses:
+            for line in sql_ses.connection.iterdump():
+                tempfile.write('%s\n' % line)
+
+        tempfile.seek(0)
+        self._sql_memory_session = SqliteSession(":memory")
+        with self._sql_memory_session as sql_mem:
+            sql_mem.cursor().executescript(tempfile.read())
+            sql_mem.commit()
+
+    def load_to_memory_v2(self):
+        source = self._sql_session.connect('existing_db.db')
+        dest = self._sql_memory_session.connect(':memory:')
+        source.backup(dest)
+        dest.close()
+        source.close_db()
