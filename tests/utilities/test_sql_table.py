@@ -151,19 +151,19 @@ def test_memory_read_and_write():
     local_table = db_tools.tables["data"]
     
     res = local_table.select(["*"])
+    assert len(res) == 2
     assert res[0] == (1, 2000, 10)
     assert res[1] == (2, 600, 300)
 
-    # SHOULD BE 2, NOT 4 ?? SHOULD NOT KNOW ABOUT MEMORY UPDATE
-    assert len(res) == 2
-
+    # Check that memory DB is dumped to local
     db_tools.load_memory_to_local() 
-
 
     res = local_table.select(["*"])
     assert len(res) == 4
     assert res[0] == (1, 2000, 10)
     assert res[1] == (2, 600, 300)
+    assert res[2] == (3, 6000, 60)
+    assert res[3] == (4, 900, 900)
 
 
 
