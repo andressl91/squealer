@@ -177,6 +177,7 @@ class DataTableTools:
         self._sql_session = SqliteSession(db_path=db_path)
         self._sql_memory_session = None
         self._sql_active_session = SqliteSession(db_path=db_path) 
+        self.context = "local"
         self.tables = {}
         self.build_db()
 
@@ -248,6 +249,7 @@ class DataTableTools:
 
         """
         tables = self._fetch_all_tables()
+        #TODO: Smarter update of available tables
         for tab in tables:
             column_data_type = self.pragma_table(table_name=tab)
             data_table = DataTable(sql_session=self._sql_active_session,
@@ -320,10 +322,41 @@ class DataTableTools:
 
         return True
 
-    def set_context(self, context:str = "local"):
+    #TODO: Change to properties!! .memory, .local
+    def get_memory_db(self):
+        if self._sql_memory_session is None:
+            self._sql_memory_session = SqliteSession(db_path=":memory:")
+
+        # Better cahing of tables belonging to each memory/local
+        self.build_db()
+        return self._sql_memory_session
+
+    def get_local_db(self):
+        return self._sql_session
+
+    def set_active_session(self, context: str="local"):
         if context == "local":
-            self._sql_active_session = self._sql_session
-            return self._sql_memory_session
+            self.context = context
+            self._sql_active_session = self.get_local_db()
+            self.build_db()
+
+        if context == "memory":
+            self.context = context
+            self._sql_active_session = self.get_memory_db()
+            self.build_db()
+        else:
+            print(f"Context {context} is unknown")
+
+    def get_active_session(self):
+        return self._sql_active_session
+
+    def load_memory_to_local(self):
+        dest = self.get_local_db()
+        source = self.get_memory_db().connection
+
+        source.backup(dest.connection)
+        dest.close_db()
+        self.build_db()
 
     def load_to_memory(self):
         # initial_value='', newline='\n'
@@ -333,14 +366,19 @@ class DataTableTools:
                 tempfile.write('%s\n' % line)
 
         tempfile.seek(0)
-        self._sql_memory_session = SqliteSession(":memory")
-        with self._sql_memory_session as sql_mem:
+
+        sql_memory_session = self.get_memory_db()
+
+        with sql_memory_session as sql_mem:
             sql_mem.cursor.executescript(tempfile.read())
             sql_mem.commit()
+        
+        self.build_db()
 
     def load_to_memory_v2(self):
-        source = self._sql_session.connect('existing_db.db')
-        dest = self._sql_memory_session.connect(':memory:')
-        source.backup(dest)
-        dest.close()
+        source = self.get_local_db()
+        dest = self.get_memory_db().connection
+
+        source.connection.backup(dest)
         source.close_db()
+        self.build_db()
