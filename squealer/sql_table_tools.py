@@ -321,28 +321,29 @@ class DataTableTools:
             return False
 
         return True
-
-    #TODO: Change to properties!! .memory, .local
-    def get_memory_db(self):
+    
+    @property
+    def memory_db(self):
         if self._sql_memory_session is None:
             self._sql_memory_session = SqliteSession(db_path=":memory:")
 
         # Better cahing of tables belonging to each memory/local
         self.build_db()
         return self._sql_memory_session
-
-    def get_local_db(self):
+    
+    @property
+    def local_db(self):
         return self._sql_session
 
     def set_active_session(self, context: str="local"):
         if context == "local":
             self.context = context
-            self._sql_active_session = self.get_local_db()
+            self._sql_active_session = self.local_db
             self.build_db()
 
         if context == "memory":
             self.context = context
-            self._sql_active_session = self.get_memory_db()
+            self._sql_active_session = self.memory_db
             self.build_db()
         else:
             print(f"Context {context} is unknown")
@@ -351,8 +352,8 @@ class DataTableTools:
         return self._sql_active_session
 
     def load_memory_to_local(self):
-        dest = self.get_local_db()
-        source = self.get_memory_db().connection
+        dest = self.local_db
+        source = self.memory_db.connection
 
         source.backup(dest.connection)
         dest.close_db()
@@ -367,7 +368,7 @@ class DataTableTools:
 
         tempfile.seek(0)
 
-        sql_memory_session = self.get_memory_db()
+        sql_memory_session = self.memory_db
 
         with sql_memory_session as sql_mem:
             sql_mem.cursor.executescript(tempfile.read())
@@ -376,8 +377,8 @@ class DataTableTools:
         self.build_db()
 
     def load_to_memory(self):
-        source = self.get_local_db()
-        dest = self.get_memory_db().connection
+        source = self.local_db
+        dest = self.memory_db.connection
 
         source.connection.backup(dest)
         source.close_db()

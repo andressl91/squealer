@@ -10,7 +10,7 @@ def get_data_table_tool(db_name="test"):
     db_tools = DataTableTools(db_path=tf)
     return db_tools
 
-def test_recreate_sqlite_db():
+def test_create_table_sqlite_db():
 
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
@@ -54,6 +54,7 @@ def test_read_and_write_table():
 
     not_valid_categories = {"money": "RREAL", "time": "REAL"}
     # Checks for unvalid SQL data type
+    #TODO: Make own test for enumerator, covering valid types 
     with pytest.raises(TypeError):
         db_tools.create_table(table_name="data",
                               categories=not_valid_categories)
@@ -74,10 +75,6 @@ def test_read_and_write_table():
     assert res[0] == (1, 2000, 10)
     assert res[1] == (2, 600, 300)
 
-    time_res = data_table.select(["time"])
-    assert time_res[0] == (10, )
-    assert time_res[1] == (300, )
-
     sql_data = [{"money": "2000", "time": "10"},
                 {"time": "300", "money": "600"}]
     data_table.multi_write(sql_data)
@@ -91,6 +88,33 @@ def test_read_and_write_table():
     res = data_table.select(["time, money"])
     print(res)
 
+
+def test_read_and_write_table_column():
+    tf = tempfile.mkdtemp()
+    tf = Path(tf) / "test.db"
+    db_tools = DataTableTools(db_path=tf)
+
+    #TODO: Use enumerator class instead of strings
+    categories = {"money": "INTEGER", "time": "INTEGER"}
+    db_tools.create_table(table_name="data",
+                          categories=categories)
+
+    # Test write, and order of write features is arbritary
+    data_table = db_tools.tables["data"]
+    sql_data = [{"money": "2000", "time": "10"},
+                {"time": "300", "money": "600"}]
+
+    for data in sql_data:
+        data_table.write(data)
+
+    #TODO: Make column data, class attribute 
+    time_res = data_table.select(["time"])
+    assert time_res[0] == (10, )
+    assert time_res[1] == (300, )
+
+    time_res = data_table.select(["money"])
+    assert time_res[0] == (2000, )
+    assert time_res[1] == (600, )
 
 def test_memory_read_and_write():
     tf = tempfile.mkdtemp()
