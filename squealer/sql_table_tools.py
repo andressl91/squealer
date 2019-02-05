@@ -358,7 +358,7 @@ class DataTableTools:
         dest.close_db()
         self.build_db()
 
-    def load_to_memory(self):
+    def load_to_memory_stringio(self):
         # initial_value='', newline='\n'
         tempfile = StringIO() 
         with self._sql_session as sql_ses:
@@ -375,7 +375,7 @@ class DataTableTools:
         
         self.build_db()
 
-    def load_to_memory_v2(self):
+    def load_to_memory(self):
         source = self.get_local_db()
         dest = self.get_memory_db().connection
 

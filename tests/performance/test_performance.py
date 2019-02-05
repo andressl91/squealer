@@ -7,10 +7,10 @@ from pathlib import Path
 from squealer.sql_table_tools import DataTableTools
 from squealer.sqlite_session import SqliteSession
 
-n_rows = 30000
+n_rows = 40000
 def get_lots_of_data(n_rows):
 
-    keys = ["a", "b", "c", "d", "e", "f", "g"]
+    keys = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
     cat = ["INTEGER" for i in range(len(keys))]
     categories = dict(zip(keys, cat))
 
@@ -70,7 +70,7 @@ def test_benchmark_single_row_write(benchmark):
 
     result = benchmark.pedantic(single_write_of_rows, kwargs=in_kwargs, 
                                 iterations=1, 
-                                rounds=3)
+                                rounds=5)
     assert result == n_rows
 
 
@@ -79,7 +79,7 @@ def test_benchmark_single_row_write_memory(benchmark):
 
     result = benchmark.pedantic(single_write_of_rows, kwargs=in_kwargs, 
                                 iterations=1, 
-                                rounds=3)
+                                rounds=5)
     assert result == n_rows
 
 def test_benchmark_multiple_row_write(benchmark):
@@ -87,7 +87,7 @@ def test_benchmark_multiple_row_write(benchmark):
 
     result = benchmark.pedantic(multiple_write_of_rows, kwargs=in_kwargs, 
                                 iterations=1, 
-                                rounds=3)
+                                rounds=5)
 
     assert result == n_rows
 
@@ -97,9 +97,51 @@ def test_benchmark_multiple_row_write_memory(benchmark, memory=True):
 
     result = benchmark.pedantic(multiple_write_of_rows, kwargs=in_kwargs, 
                                 iterations=1, 
-                                rounds=3)
+                                rounds=5)
 
     assert result == n_rows
+
+
+def multiple_write_of_rows(n_rows, memory: str="stringio"):
+    td = tempfile.mkdtemp()
+    tf = Path(td) / "test_mrows.db"
+    tf = str(tf)
+    db_tools = DataTableTools(db_path=tf)
+
+    if memory:
+        db_tools.set_active_session("memory")
+
+    categories, sql_data = get_lots_of_data(n_rows=n_rows)
+    db_tools.create_table(table_name="data",
+                          categories=categories)
+
+    data_table = db_tools.tables["data"]
+    data_table.multi_write(sql_data)
+    
+    if memory == "stringio":
+        db_tools.load_to_memory_stringio()
+    else:
+        db_tools.load_to_memory()
+    
+@pytest.mark.memory
+def test_benchmark_load_data_to_memory_stringio(benchmark, memory=True):
+
+
+    in_kwargs = {"n_rows": n_rows, "memory": "stringio"} 
+
+    result = benchmark.pedantic(multiple_write_of_rows, kwargs=in_kwargs, 
+                                iterations=1, 
+                                rounds=3)
+
+@pytest.mark.memory
+def test_benchmark_load_data_to_memory(benchmark, memory=True):
+
+
+    in_kwargs = {"n_rows": n_rows, "memory": ""} 
+
+    result = benchmark.pedantic(multiple_write_of_rows, kwargs=in_kwargs, 
+                                iterations=1, 
+                                rounds=3)
 
 if __name__ == "__main__":
     test_read_and_write_table()

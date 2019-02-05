@@ -112,7 +112,7 @@ def test_memory_read_and_write():
     local_table = db_tools.tables["data"]
     local_table.multi_write(sql_data)
 
-    # Change context to memory db and check that data table not initiated
+    # Change context to memory db and check that data table isn't initiated
     db_tools.set_active_session("memory")
     assert db_tools.context == "memory"
     memory_tables = db_tools._fetch_all_tables()
@@ -120,9 +120,8 @@ def test_memory_read_and_write():
 
     # Load data to memory now
     # Works
-    #db_tools.load_to_memory()
-    
-    db_tools.load_to_memory_v2()
+    #db_tools.load_to_memory_stringio()
+    db_tools.load_to_memory()
 
     memory_tables = db_tools._fetch_all_tables()
     assert "data" in memory_tables
