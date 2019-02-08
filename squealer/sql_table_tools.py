@@ -174,10 +174,10 @@ class DataTableTools:
             sql_session:
 
         """
-        self._sql_session = SqliteSession(db_path=db_path)
+        self._sql_local_session = SqliteSession(db_path=db_path)
         self._sql_memory_session = None
-        self._sql_active_session = SqliteSession(db_path=db_path) 
-        self.context = "local"
+        self._sql_active_session = self._sql_local_session
+        self._context = "local"
         self.tables = {}
         self.build_db()
 
@@ -207,6 +207,7 @@ class DataTableTools:
                                   type='table'")
 
             tables = sql_ses.cursor.fetchall()
+        print(tables, sql_ses.db_path)
         return [tab[0] for tab in tables]
 
     def _does_table_exist(self, sql_ses, table_name) -> bool:
@@ -249,13 +250,14 @@ class DataTableTools:
 
         """
         tables = self._fetch_all_tables()
+        self.tables = {}
         #TODO: Smarter update of available tables
         for tab in tables:
             column_data_type = self.pragma_table(table_name=tab)
             data_table = DataTable(sql_session=self._sql_active_session,
                                    table_name=tab,
                                    categories=column_data_type)
-            self.__dict__[tab] = data_table
+            # self.__dict__[tab] = data_table
             self.tables[tab] = data_table
 
     def create_table(self, table_name: str,
@@ -305,7 +307,7 @@ class DataTableTools:
         # Delete from list for now
         # TODO: Change to set
         del self.tables[table_name]
-        del self.__dict__[table_name]
+        # del self.__dict__[table_name]
 
     def get_categories(self, table_name):
         # TODO: Add bool for addiing categories to DataTable if none
@@ -327,26 +329,25 @@ class DataTableTools:
         if self._sql_memory_session is None:
             self._sql_memory_session = SqliteSession(db_path=":memory:")
 
-        # Better cahing of tables belonging to each memory/local
-        self.build_db()
         return self._sql_memory_session
     
     @property
     def local_db(self):
-        return self._sql_session
+        return self._sql_local_session
 
-    def set_active_session(self, context: str="local"):
-        if context == "local":
-            self.context = context
-            self._sql_active_session = self.local_db
-            self.build_db()
+    @property
+    def context(self):
+        return self._context
 
-        if context == "memory":
-            self.context = context
-            self._sql_active_session = self.memory_db
-            self.build_db()
-        else:
-            print(f"Context {context} is unknown")
+    def set_local_session(self):
+        self._context = "local"
+        self._sql_active_session = self.local_db
+        self.build_db()
+
+    def set_memory_session(self):
+        self._context = "memory"
+        self._sql_active_session = self.memory_db
+        self.build_db()
 
     def get_active_session(self):
         return self._sql_active_session
@@ -362,19 +363,23 @@ class DataTableTools:
     def load_to_memory_stringio(self):
         # initial_value='', newline='\n'
         tempfile = StringIO() 
-        with self._sql_session as sql_ses:
+        with self.local_db as sql_ses:
             for line in sql_ses.connection.iterdump():
                 tempfile.write('%s\n' % line)
 
         tempfile.seek(0)
 
-        sql_memory_session = self.memory_db
-
-        with sql_memory_session as sql_mem:
+        with self.memory_db as sql_mem:
             sql_mem.cursor.executescript(tempfile.read())
             sql_mem.commit()
         
-        self.build_db()
+        if self.context != "memory":
+            self.set_memory_session()
+            self.build_db()
+            self.set_local_session()
+
+        else:
+            self.build_db()
 
     def load_to_memory(self):
         source = self.local_db
@@ -382,4 +387,12 @@ class DataTableTools:
 
         source.connection.backup(dest)
         source.close_db()
-        self.build_db()
+
+        if self.context != "memory":
+            self.set_memory_session()
+            self.build_db()
+            self.set_local_session()
+
+        else:
+            self.build_db()
+

@@ -78,7 +78,10 @@ def test_read_and_write_table():
 
     sql_data = [{"money": "2000", "time": "10"},
                 {"time": "300", "money": "600"}]
+
+
     data_table.multi_write(sql_data)
+
     res = data_table.select(["*"])
     # TODO: Multi write should support random order of dict.keys
     # only write suppoerts this for now

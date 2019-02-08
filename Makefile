@@ -54,10 +54,16 @@ lint: ## check style with flake8
 	flake8 squealer tests
 
 test: ## run tests quickly with the default Python
-	pytest tests/utilities -v
+	pytest tests/test_local_db tests/test_memory_db -v
+
+test_local_db:
+	pytest tests/test_local_db -v
+
+test_memory_db:
+	pytest tests/test_memory_db -v
 
 performance: ## run tests quickly with the default Python
-	pytest tests/performance -v
+	pytest tests/test_performance -v
 
 test-all: ## run tests on every Python version with tox
 	tox

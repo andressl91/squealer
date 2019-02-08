@@ -29,6 +29,8 @@ class SqliteSession(SqlSession):
         self._cursor = None
         # TODO: If running in memory, connection stay open, or else db is lost.
         # Alter enter/exit
+        # For debugging memory db
+        self._been_closed = False
 
     def connect(self):
         if self._connection:
@@ -82,3 +84,4 @@ class SqliteSession(SqlSession):
         else:
             self.connect()
             self.close_db()
+            self._been_closed = True
