@@ -1,4 +1,3 @@
-
 import tempfile
 import sqlite3
 import pytest
@@ -121,6 +120,22 @@ def test_read_and_write_table_column():
     assert money_res[1] == (600, )
 
 
+def test_truediv_operator():
+    tf = tempfile.mkdtemp()
+    tf = Path(tf) / "test.db"
+    db_tools = DataTableTools(db_path=tf)
+
+    categories = {"money": "INTEGER", "time": "INTEGER"}
+    db_tools.create_table(table_name="data",
+                          categories=categories)
+    
+    # Try to find a non-existing table
+    no_table = db_tools / "hey"
+    assert no_table is None
+    
+    a_table = db_tools / "data"
+    assert a_table == db_tools.tables["data"]
+    
 if __name__ == "__main__":
     d
     test_read_and_write_table()

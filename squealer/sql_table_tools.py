@@ -396,3 +396,9 @@ class DataTableTools:
         else:
             self.build_db()
 
+
+    def __truediv__(self, other):
+        if other in self.tables:
+            return self.tables[other] 
+        return 
+
