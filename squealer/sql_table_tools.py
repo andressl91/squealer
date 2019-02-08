@@ -310,7 +310,7 @@ class DataTableTools:
         # del self.__dict__[table_name]
 
     def get_categories(self, table_name):
-        # TODO: Add bool for addiing categories to DataTable if none
+        # TODO: Must be a better way to get categories from table 
         sql = f"""SELECT * FROM {table_name}"""
         with self._sql_active_session as sql_ses:
             sql_ses.cursor.execute(sql)
