@@ -89,7 +89,6 @@ def test_read_and_write_table():
     assert res[3] == (4, 600, 300)
 
     res = data_table.select(["time, money"])
-    print(res)
 
 
 def test_read_and_write_table_column():
@@ -120,6 +119,7 @@ def test_read_and_write_table_column():
     assert money_res[1] == (600, )
 
 
+
 def test_truediv_operator():
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
@@ -134,8 +134,10 @@ def test_truediv_operator():
     assert no_table is None
     
     a_table = db_tools / "data"
+    
     assert a_table == db_tools.tables["data"]
     
 if __name__ == "__main__":
-    d
+    test_sqlite3_row_factory()
+    
     test_read_and_write_table()

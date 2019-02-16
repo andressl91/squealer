@@ -1,3 +1,4 @@
+import sqlite3
 from typing import Dict, List
 from enum import Enum
 from io import StringIO
@@ -37,6 +38,7 @@ class DataTable:
         self._table_name = table_name
         if self.validate_category_type(categories):
             self._categories = categories
+        self.columns = list(self._categories.keys())
 
     @property
     def primary_key(self):
@@ -89,6 +91,24 @@ class DataTable:
         with self._sql_session as sql_ses:
             sql_ses.cursor.execute(sql_request)
             result = sql_ses.cursor.fetchall()
+            return result
+
+    def select_row(self, sql: List[str]):
+        """Fetch one/multiple columns from table using sqlite3 row factory
+
+        Attr:
+            sql: List of requested columns
+
+        """
+        sql_request = f"""SELECT {" ".join(i for i in sql)} FROM
+        {self._table_name}"""
+
+        with self._sql_session as sql_ses:
+            sql_ses.row_factory = sqlite3.Row
+            cursor = sql_ses.cursor
+            cursor.execute(sql_request)
+            
+            result = sql_ses.cursor.fetchone()#fetchall()
             return result
 
     def clean_table(self):
@@ -164,6 +184,12 @@ class DataTable:
                 write_file.write("\n".encode())
         self.close_db()
 
+    def __truediv__(self, other):
+        if type(other) is str:
+            if other in self.columns:
+                return self.select([other])
+        #self._
+        #self.select()
 
 class DataTableTools:
 
@@ -207,7 +233,6 @@ class DataTableTools:
                                   type='table'")
 
             tables = sql_ses.cursor.fetchall()
-        print(tables, sql_ses.db_path)
         return [tab[0] for tab in tables]
 
     def _does_table_exist(self, sql_ses, table_name) -> bool:
@@ -291,7 +316,6 @@ class DataTableTools:
                             text += f"{keys[i]} {categories[keys[i]]}"
 
                     text += ")"
-                    print(text)
                 (text)
                 sql_ses.cursor.execute(text)
         # TODO: Possibly not needed if exist, just check dict
