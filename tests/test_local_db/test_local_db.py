@@ -2,19 +2,19 @@ import tempfile
 import sqlite3
 import pytest
 from pathlib import Path
-from squealer.sql_table_tools import DataTableTools
+from squealer.sql_database import DataBase
 
 def get_data_table_tool(db_name="test"):
     tf = tempfile.TemporaryFile(suffix=".db", prefix=db_name)
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
     return db_tools
 
 def test_create_table_sqlite_db():
 
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     # Check inital registry is empty
     assert list(db_tools.tables.keys()) == []
@@ -30,7 +30,7 @@ def test_create_table_uniqe_key():
 
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
     categories = {"money": "REAL", "time": "REAL PRIMARY KEY"}
     db_tools.create_table(table_name="data",
                           categories=categories,
@@ -50,7 +50,7 @@ def test_read_and_write_table():
 
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     not_valid_categories = {"money": "RREAL", "time": "REAL"}
     # Checks for unvalid SQL data type
@@ -94,7 +94,7 @@ def test_read_and_write_table():
 def test_read_and_write_table_column():
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     #TODO: Use enumerator class instead of strings
     categories = {"money": "INTEGER", "time": "INTEGER"}
@@ -123,7 +123,7 @@ def test_read_and_write_table_column():
 def test_truediv_operator():
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "test.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     categories = {"money": "INTEGER", "time": "INTEGER"}
     db_tools.create_table(table_name="data",

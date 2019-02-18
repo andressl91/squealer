@@ -4,7 +4,7 @@ import tempfile
 
 from pathlib import Path
 
-from squealer.sql_table_tools import DataTableTools
+from squealer.sql_database import DataBase
 from squealer.sqlite_session import SqliteSession
 
 n_rows = 1000
@@ -27,7 +27,7 @@ def write_read_memory(n_rows, memory):
     td = tempfile.mkdtemp()
     tf = Path(td) / "test_mrows.db"
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     db_tools.set_memory_session
 
@@ -46,7 +46,7 @@ def write_read_local(n_rows, memory):
     td = tempfile.mkdtemp()
     tf = Path(td) / "test_mrows.db"
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     if memory:
         db_tools.set_memory_session
@@ -68,7 +68,7 @@ def load_db_to_memory(n_rows, memory):
     td = tempfile.mkdtemp()
     tf = Path(td) / f"test_{memory}_rows.db"
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     categories, sql_data = get_lots_of_data(n_rows=n_rows)
     db_tools.create_table(table_name="data",
@@ -82,13 +82,13 @@ def load_db_to_memory(n_rows, memory):
     else:
         db_tools.load_to_memory()
 
-    db_tools.memory_db.close_db()
+    db_tools.memory_db.close()
 
 def write_memory_persist_local(n_rows, memory):
     td = tempfile.mkdtemp()
     tf = Path(td) / "test_mrows.db"
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     if memory:
         db_tools.set_memory_session

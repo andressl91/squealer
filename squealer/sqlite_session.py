@@ -5,7 +5,7 @@ from abc import abstractmethod
 class SqlSession:
 
     @abstractmethod
-    def connect_db(self):
+    def connect(self):
         pass
 
     @abstractmethod
@@ -17,7 +17,7 @@ class SqlSession:
         pass
 
     @abstractmethod
-    def close_db(self):
+    def close(self):
         pass
 
 
@@ -55,7 +55,7 @@ class SqliteSession(SqlSession):
     def execute(self, sql_command):
         self._cursor.execute(sql_command)
 
-    def close_db(self):
+    def close(self):
         """Closes the connection:
 
         Note:
@@ -83,5 +83,5 @@ class SqliteSession(SqlSession):
 
         else:
             self.connect()
-            self.close_db()
+            self.close()
             self._been_closed = True

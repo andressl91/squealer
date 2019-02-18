@@ -4,7 +4,7 @@ import tempfile
 
 from pathlib import Path
 
-from squealer.sql_table_tools import DataTableTools
+from squealer.sql_database import DataBase
 from squealer.sqlite_session import SqliteSession
 
 n_rows = 30000
@@ -29,7 +29,7 @@ def single_write_of_rows(n_rows, memory: bool=False):
     td = tempfile.mkdtemp()
     tf = Path(td) / "test_rows.db"
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
     if memory:
         db_tools.set_memory_session
 
@@ -51,7 +51,7 @@ def multiple_write_of_rows(n_rows, memory: bool=False):
     td = tempfile.mkdtemp()
     tf = Path(td) / "test_mrows.db"
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     if memory:
         db_tools.set_memory_session

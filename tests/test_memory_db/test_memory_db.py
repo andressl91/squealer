@@ -2,19 +2,19 @@ import tempfile
 import sqlite3
 import pytest
 from pathlib import Path
-from squealer.sql_table_tools import DataTableTools
+from squealer.sql_database import DataBase
 
 def get_data_table_tool(db_name="test"):
     tf = tempfile.TemporaryFile(suffix=".db", prefix=db_name)
     tf = str(tf)
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
     return db_tools
 
 
 def test_initiate_memory_db():
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "mytest.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     assert not db_tools.in_memory() 
     assert db_tools.context == "local"
@@ -42,7 +42,7 @@ def test_initiate_memory_db():
 def test_load_local_db_to_memory():
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "mytest.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     categories = {"money": "INTEGER", "time": "INTEGER"}
     db_tools.create_table(table_name="data",
@@ -83,7 +83,7 @@ def test_load_local_db_to_memory():
 def test_memory_read_and_write():
     tf = tempfile.mkdtemp()
     tf = Path(tf) / "mytest.db"
-    db_tools = DataTableTools(db_path=tf)
+    db_tools = DataBase(db_path=tf)
 
     categories = {"money": "INTEGER", "time": "INTEGER"}
     db_tools.set_memory_session()
