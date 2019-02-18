@@ -186,7 +186,7 @@ class DataTable:
 
     def __truediv__(self, other):
         if type(other) is str:
-            if other in self.columns:
+            if other in self.columns or other == "*":
                 return self.select([other])
         #self._
         #self.select()

@@ -26,7 +26,11 @@ def test_table_stuff():
 
     money_column = data_table / "money"
     print(money_column)
-    # assert money_column == (2000, 600)
+    assert money_column == [(2000, ), (600, )]
+
+    all_columns = data_table / "*"
+    print(all_columns)
+    assert all_columns[0] == (1, 2000, 10)
 
 if __name__ == "__main__":
     test_table_stuff()
