@@ -188,8 +188,6 @@ class DataTable:
         if type(other) is str:
             if other in self.columns or other == "*":
                 return self.select([other])
-        #self._
-        #self.select()
 
 class DataTableTools:
 

@@ -32,5 +32,7 @@ def test_table_stuff():
     print(all_columns)
     assert all_columns[0] == (1, 2000, 10)
 
+    # TODO: Implement arithmeic operators for columns
+
 if __name__ == "__main__":
     test_table_stuff()
